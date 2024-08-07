@@ -1,7 +1,6 @@
 const joi = require('joi')
-const { emit } = require('../db/db.config')
 
-const loginValidation = async data => {
+const loginValidation = async (req, res, next) => {
     const emailSchema = joi.object({
         email: joi.string()
             .email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } }),
@@ -9,10 +8,14 @@ const loginValidation = async data => {
             .min(6)
             .required()
     })
-    return emailSchema.validate(data)
+    const { error } = emailSchema.validate(req.body)
+    if (error) {
+        return res.status(400).json({ Error: error.details[0].message })
+    }
+    next()
 }
 
-const registerValidation = async data => {
+const registerValidation = async (req, res, next) => {
     const schema = joi.object({
         name: joi.string()
             .required(),
@@ -26,25 +29,48 @@ const registerValidation = async data => {
             .min(8)
             .required()
     })
-    return schema.validate(data)
+    const { error } = schema.validate(req.body)
+    if (error) {
+        return res.status(400).json({ Error: error.details[0].message })
+    }
+    next()
 }
 
-const expenseValidator = async (data) => {
+const expenseValidator = (req, res, next) => {
     const schema = joi.object({
+        user_id: joi.number()
+            .required(),
         amount: joi.number()
             .required(),
         description: joi.string()
-            .min(10)
+            .min(3)
             .required(),
         category: joi.string()
             .min(3)
             .required()
+    });
+    const { error } = schema.validate(req.body);
+    if (error) {
+        return res.status(400).json({ Error: error.details[0].message });
+    }
+    next();
+};
+
+const validateId = (req, res, next) => {
+    const schema = joi.object({
+        id: joi.number().integer().required()
     })
-    return schema.validate(data)
+    const { error } = schema.validate(req.params)
+    if (error) {
+        res.status(400).json({ Error: error.details[0].message })
+    }
+    next()
 }
+
 
 module.exports = {
     loginValidation,
     registerValidation,
-    expenseValidator
+    expenseValidator,
+    validateId,
 }
