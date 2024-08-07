@@ -1,7 +1,7 @@
 
 const db = require('../db/db.config');
 const { loginValidation, registerValidation } = require('../util/fieldsValidator');
-const { hashPassword } = require('../util/util-helper');
+const { hashPassword } = require('../service/userService');
 const bcrypt = require('bcrypt')
 
 exports.userRegister = async (request, response) => {
@@ -29,6 +29,7 @@ exports.userLogin = (req, res) => {
     const { error } = loginValidation(req.body)
     if (error) {
         res.status(500).json({ Error: error.details[0].message })
+        return
     }
 
     var sqlFindQuery = "SELECT * FROM user WHERE email = ?"

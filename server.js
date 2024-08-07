@@ -10,7 +10,7 @@ const port = 8081;
 
 server.use('/users', userRoute)
 
-server.use(expenseRoute)
+server.use('/api', expenseRoute)
 
 
 
