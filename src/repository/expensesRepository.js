@@ -9,7 +9,7 @@ class ExpensesReporitory {
         return new Promise((resolve, reject) => {
             db.query(sql, [user_id, amount, description, category, date], function (error, result) {
                 if (error) {
-                    console.log('Error while inserting into database')
+                    // console.log('Error while inserting into database')
                     return reject(error)
                 }
                 resolve(result.insertId)

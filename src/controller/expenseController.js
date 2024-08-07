@@ -1,4 +1,4 @@
-const db = require('../db/db.config')
+const { RECORD_NOT_FOUND_ERR } = require('../error/error')
 const expensesRepository = require('../repository/expensesRepository')
 
 /** creates a new expense for user.id */
@@ -6,7 +6,7 @@ exports.createExpense = async (req, res) => {
     try {
         const expense = req.body
         const result = await expensesRepository.createExpense(expense)
-        res.status(200).json({ InsertID: result })
+        res.status(201).json({ InsertID: result })
     } catch (error) {
         res.status(500).json({ Error: error.message })
     }
@@ -18,7 +18,7 @@ exports.getAllExpenses = async (req, res) => {
         const result = await expensesRepository.fetchAllExpences()
         res.status(200).json({ result })
     } catch (error) {
-        res.status(400).json({ Error: error.message })
+        res.status(500).json({ Error: error.message })
     }
 }
 
@@ -28,11 +28,11 @@ exports.getExpenses = async (req, res) => {
         let id = req.params.id
         const result = await expensesRepository.getExpenses(id)
         if (result.length === 0) {
-            return res.status(200).json({ message: 'No Expenses found' })
+            return res.status(404).json({ message: RECORD_NOT_FOUND_ERR })
         }
         return res.status(200).json({ result })
     } catch (error) {
-        return res.status(400).json({ Error: error.message })
+        return res.status(500).json({ Error: error.message })
     }
 }
 
@@ -43,6 +43,9 @@ exports.updateExpense = async (req, res) => {
         let userId = req.params.uid
         let eid = req.params.eid
         const result = await expensesRepository.updateExpence(expense, userId, eid)
+        if(result.affectedRows === 0){
+            return res.status(404).json({message: RECORD_NOT_FOUND_ERR})
+        }
         return res.status(200).json({ result })
     } catch (error) {
         return res.status(400).json({ Error: error.message })
@@ -53,9 +56,9 @@ exports.deleteExpenseById = async (req, res) => {
     try {
         const result = await expensesRepository.deleteExpense(req.params)
         if (result === 0) {
-            return res.status(200).json({ message: 'Nothing to delete' })
+            return res.status(404).json({ message: RECORD_NOT_FOUND_ERR })
         }
-        return res.status(200).json({ effectedRow: result, message: 'Deleted !' })
+        return res.status(200).json({ effectedRow: result, message: 'DELETED' })
     } catch (error) {
         return res.status(400).json({ Error: error.message })
     }

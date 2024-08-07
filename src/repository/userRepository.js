@@ -5,23 +5,21 @@ const { hashPassword } = require('../service/userService')
 class UserRepository {
 
     async createUser(user) {
-        const name = user.name
-        const email = user.email
-        const contact = user.contact
-        const password = user.password
-
+        const { name, email, contact, password } = user
         var sql = "INSERT INTO user (name, email, contact, password) VALUES (?,?,?,?) ";
         let hashedPassword = await hashPassword(password)
-        console.log('hashed password :', hashedPassword)
+        // console.log('hashed password :', hashedPassword)
         return new Promise((resolve, reject) => {
             db.query(sql, [name, email, contact, hashedPassword], function (error, result, fields) {
                 if (error) {
                     console.log('Error while inserting into database')
-                    reject(error)
+                    return reject(error)
                 }
-                console.log('InsertId: ', result.insertId)
-                resolve(result.insertId)
+                // console.log('InsertId: ', result.insertId)
+                return resolve(result)
             })
+        }).catch((err) => {
+            return err
         })
     }
 
