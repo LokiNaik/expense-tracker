@@ -11,8 +11,7 @@ exports.createExpense = (req, res) => {
 
     const { error } = expenseValidator(req.body)
     if (error) {
-        res.status(500).json({ Error: error.details[0].message })
-        return
+        return res.status(500).json({ Error: error.details[0].message })
     }
 
     var sql = "INSERT INTO user_expenses (user_id, amount, description, category, date) VALUES (?,?,?,?,?) ";
@@ -31,7 +30,7 @@ exports.getAllExpenses = (req, res) => {
     let sql = 'SELECT * FROM user_expenses'
     db.query(sql, function (error, result) {
         if (error) {
-            res.status(400).json({ message: error.message })
+            return res.status(400).json({ message: error.message })
         }
         res.status(200).json({ message: result })
     })
@@ -41,8 +40,7 @@ exports.getAllExpenses = (req, res) => {
 exports.getExpenses = (req, res) => {
     let id = req.params.id
     if (!id) {
-        res.status(400).json({ Error: 'Id not present!' })
-        return
+        return res.status(400).json({ Error: 'Id not present!' })
     }
     let sql = `SELECT user.id, user.name, user_expenses.amount, user_expenses.description, user_expenses.date
                 FROM user INNER JOIN user_expenses ON user.id = user_expenses.user_id 
@@ -50,12 +48,10 @@ exports.getExpenses = (req, res) => {
     db.query(sql, function (err, result) {
         if (err) {
             console.log('error', err)
-            res.status(400).json({ Error: err.message })
-            return
+            return res.status(400).json({ Error: err.message })
         }
         if (result.length === 0) {
-            res.status(200).json({ message: 'No Expenses found' })
-            return
+            return res.status(200).json({ message: 'No Expenses found' })
         }
         res.status(200).json({ message: result })
     })
