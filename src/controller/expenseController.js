@@ -44,7 +44,7 @@ exports.getExpenses = (req, res) => {
         res.status(400).json({ Error: 'Id not present!' })
         return
     }
-    let sql = `SELECT user.id, user.name, user_expenses.amount, user_expenses.description 
+    let sql = `SELECT user.id, user.name, user_expenses.amount, user_expenses.description, user_expenses.date
                 FROM user INNER JOIN user_expenses ON user.id = user_expenses.user_id 
                 WHERE user.id=${id}`
     db.query(sql, function (err, result) {
