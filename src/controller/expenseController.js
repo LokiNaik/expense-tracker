@@ -1,18 +1,18 @@
 const db = require('../db/db.config')
 const expensesRepository = require('../repository/expensesRepository')
 
-
+/** creates a new expense for user.id */
 exports.createExpense = async (req, res) => {
     try {
         const expense = req.body
         const result = await expensesRepository.createExpense(expense)
         res.status(200).json({ InsertID: result })
     } catch (error) {
-        res.status(500).json({ Error: error })
+        res.status(500).json({ Error: error.message })
     }
 }
 
-
+/** Fetch all expenses from DB */
 exports.getAllExpenses = async (req, res) => {
     try {
         const result = await expensesRepository.fetchAllExpences()
@@ -35,3 +35,29 @@ exports.getExpenses = async (req, res) => {
         return res.status(400).json({ Error: error.message })
     }
 }
+
+/**Update existing record of expense */
+exports.updateExpense = async (req, res) => {
+    try {
+        let expense = req.body
+        let userId = req.params.uid
+        let eid = req.params.eid
+        const result = await expensesRepository.updateExpence(expense, userId, eid)
+        return res.status(200).json({ result })
+    } catch (error) {
+        return res.status(400).json({ Error: error.message })
+    }
+}
+
+exports.deleteExpenseById = async (req, res) => {
+    try {
+        const result = await expensesRepository.deleteExpense(req.params)
+        if (result === 0) {
+            return res.status(200).json({ message: 'Nothing to delete' })
+        }
+        return res.status(200).json({ effectedRow: result, message: 'Deleted !' })
+    } catch (error) {
+        return res.status(400).json({ Error: error.message })
+    }
+}
+

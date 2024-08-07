@@ -62,7 +62,22 @@ const validateId = (req, res, next) => {
     })
     const { error } = schema.validate(req.params)
     if (error) {
-        res.status(400).json({ Error: error.details[0].message })
+        return res.status(400).json({ Error: error.details[0].message })
+    }
+    next()
+}
+
+const expenseUpdateValidator = (req, res, next) => {
+    const schema = joi.object({
+        user_id: joi.number().optional(),
+        amount: joi.number().optional(),
+        description: joi.string().optional().min(3),
+        category: joi.string().min(3).optional()
+    })
+    const { err } = schema.validate(req.body)
+    if (err) {
+        return res.status(400).json({ Error: err.details[0].message }
+        )
     }
     next()
 }
@@ -73,4 +88,5 @@ module.exports = {
     registerValidation,
     expenseValidator,
     validateId,
+    expenseUpdateValidator,
 }
