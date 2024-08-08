@@ -37,6 +37,20 @@ class UserRepository {
             return reject(err)
         })
     }
+
+    async getUser(email) {
+        let sql = 'SELECT user.id, user.email FROM user WHERE user.email = ?'
+        return new Promise((resolve, reject) => {
+            db.query(sql, email, function (error, result) {
+                if (error) {
+                    return reject(error)
+                }
+                return resolve(result)
+            })
+        }).catch((error) => {
+            return error
+        })
+    }
 }
 
 

@@ -38,8 +38,7 @@ const registerValidation = async (req, res, next) => {
 
 const expenseValidator = (req, res, next) => {
     const schema = joi.object({
-        user_id: joi.number()
-            .required(),
+        // user_id: joi.string().required(),
         amount: joi.number()
             .required(),
         description: joi.string()

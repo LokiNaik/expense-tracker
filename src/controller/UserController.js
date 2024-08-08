@@ -6,26 +6,45 @@ const { INTERNAL_SERVER_ERROR, USER_NOT_FOUND_ERR, WRONG_PASSWORD_ERR, SERVER_ER
 require('dotenv').config();
 const SECRET_KEY = process.env.SECRET_KEY
 
-exports.userRegister = async (request, res) => {
+
+/**
+ * 
+ * @param {object} request Express request object
+ * @param {object} res Express response object
+ * @param {object} next Express next middleware function
+ * @returns 
+ */
+exports.userRegister = async (request, res, next) => {
     try {
         const user = request.body;
         const response = await userRepository.createUser(user)
-        if (response.code === 'ER_DUP_ENTRY') {
-            return res.status(500).json({ DUPLICATE_RECORD_ERR })
+        if (response.code) {
+            console.log('Error : {}', response)
+            return next({ status: 500, message: DUPLICATE_RECORD_ERR })
         }
-        return res.status(201).json({ Id: response })
+        return res.status(201).json({ user_created: response })
     } catch (error) {
         console.log('Error : ', error)
-        return res.status(500).json({ Error: INTERNAL_SERVER_ERROR, message: error.message })
+        return next({ status: 500, message: INTERNAL_SERVER_ERROR })
     }
 }
 
-exports.userLogin = async (req, res) => {
+/**
+ * 
+ * @param {object} request Express request object
+ * @param {object} res Express response object
+ * @param {object} next Express next middleware function
+ * @returns 
+ */
+exports.userLogin = async (req, res, next) => {
     const user = req.body
     try {
         const result = await userRepository.userLogin(user)
         if (result.length === 0) {
-            return res.status(404).json({ message: USER_NOT_FOUND_ERR });
+            return next({ status: 404, message: USER_NOT_FOUND_ERR });
+        }
+        if (result.code) {
+            return next({ status: 500, message: result.code });
         }
         let hash = result[0].password
         bcrypt.compare(user.password, hash).then((isMatch) => {
@@ -33,12 +52,31 @@ exports.userLogin = async (req, res) => {
                 const token = jwt.sign({ username: user.email }, SECRET_KEY, { expiresIn: '1h' });
                 return res.status(200).json({ token });
             } else {
-                return res.status(401).json({ message: WRONG_PASSWORD_ERR });
+                return next({ status: 401, message: WRONG_PASSWORD_ERR });
             }
         }).catch((err) => {
-            return res.status(400).json({ message: SERVER_ERR })
+            return next({ status: 400, message: SERVER_ERR })
         })
     } catch (error) {
-        return res.status(500).json({ Error: error.message })
+        return next({ status: 500, message: error.message })
     }
+}
+
+/**
+ * 
+ * @param {object} request Express request object
+ * @param {object} res Express response object
+ * @param {object} next Express next middleware function
+ * @returns 
+ */
+exports.getUser = async (req, res, next) => {
+    const email = req
+    const result = await userRepository.getUser(email)
+    if (result.length === 0) {
+        return res.status(404).json({ message: USER_NOT_FOUND_ERR });
+    }
+    if (result.code) {
+        return next({ status: 500, message: result.code });
+    }
+    return result
 }
