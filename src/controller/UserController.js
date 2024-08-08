@@ -19,13 +19,13 @@ exports.userRegister = async (request, res, next) => {
         const user = request.body;
         const response = await userRepository.createUser(user)
         if (response.code) {
-            console.log('Error : {}', response)
+            console.log('code Error : {}', response)
             return next({ status: 500, message: DUPLICATE_RECORD_ERR })
         }
         return res.status(201).json({ user_created: response })
     } catch (error) {
         console.log('Error : ', error)
-        return next({ status: 500, message: INTERNAL_SERVER_ERROR })
+        return next({ status: 500, message: error.code })
     }
 }
 

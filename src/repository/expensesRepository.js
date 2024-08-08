@@ -1,5 +1,6 @@
 const { getUser } = require('../controller/UserController')
 const db = require('../db/db.config')
+const { queryHelper } = require('./queryHelper')
 
 class ExpensesRepository {
 
@@ -8,7 +9,7 @@ class ExpensesRepository {
         var date = new Date()
         var sql = 'INSERT INTO user_expenses (user_email, amount, description, category, date) VALUES (?,?,?,?,?)'
         try {
-            const result = await this.queryHelper(sql, [user_email, amount, description, category, date]);
+            const result = await queryHelper(sql, [user_email, amount, description, category, date]);
             return result.insertId;
         } catch (error) {
             console.error('Error while inserting into database', error);
@@ -20,7 +21,7 @@ class ExpensesRepository {
     async fetchAllExpences() {
         let sql = 'SELECT * FROM user_expenses'
         try {
-            const result = await this.queryHelper(sql)
+            const result = await queryHelper(sql)
             return result
         } catch (error) {
             console.error('Error fetching all expenses', error);
@@ -34,7 +35,7 @@ class ExpensesRepository {
                     FROM user INNER JOIN user_expenses ON user.email = user_expenses.user_email 
                     WHERE user.email=?`
         try {
-            const result = await this.queryHelper(sql, [email])
+            const result = await queryHelper(sql, [email])
             return result
         } catch (error) {
             console.error('Error fetching expenses', error);
@@ -46,7 +47,7 @@ class ExpensesRepository {
     async getExpenseByExpenseId(id) {
         let sql = 'SELECT * FROM user_expenses WHERE user_expenses.id = ?'
         try {
-            const result = await this.queryHelper(sql, [id])
+            const result = await queryHelper(sql, [id])
             return result
         } catch (error) {
             console.log('Error in fetching the expense ', error)
@@ -61,7 +62,7 @@ class ExpensesRepository {
         const query = `DELETE FROM user_expenses WHERE id = ? AND user_email = ?`
 
         try {
-            const result = await this.queryHelper(query, [expenseId, email])
+            const result = await queryHelper(query, [expenseId, email])
             return result.affectedRows
         } catch (error) {
             console.log('Error deleting expense :', error)
@@ -107,25 +108,13 @@ class ExpensesRepository {
             values.push(userResponse[0].email, eid)
             // console.log('values ', values)
             const sql = `UPDATE user_expenses SET ${updates.join(', ')} WHERE user_email = ? AND id = ?`;
-            const result = await this.queryHelper(sql, values)
+            const result = await queryHelper(sql, values)
             return result
 
         } catch (error) {
             console.log('Error updating. ', error)
             throw error
         }
-    }
-
-
-    queryHelper(sql, params = []) {
-        return new Promise((resolve, reject) => {
-            db.query(sql, params, (err, result) => {
-                if (err) {
-                    return reject(err);
-                }
-                return resolve(result);
-            });
-        });
     }
 }
 

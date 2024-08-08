@@ -16,7 +16,7 @@ exports.authenticateJWT = (req, res, next) => {
             if (err) {
                 return res.status(401).json({ message: ACCESS_DENIED_ERR });
             }
-            console.log('User : ',user)
+            // console.log('User : ',user)
             req.user = user;
             next();
         });
