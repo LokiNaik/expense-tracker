@@ -14,13 +14,16 @@ exports.authenticateJWT = (req, res, next) => {
     if (token) {
         jwt.verify(token, SECRET_KEY, (err, user) => {
             if (err) {
-                return res.status(401).json({ message: ACCESS_DENIED_ERR });
+                return res.status(403).json({ message: ACCESS_DENIED_ERR });
             }
-            // console.log('User : ',user)
+            console.log('User : ', user)
             req.user = user;
+            // if (requiredRole && user.role !== requiredRole) {
+            //     return res.status(403).json({ message: 'Access denied' });
+            // }
             next();
         });
     } else {
         return res.status(401).json({ AUTH_TOKEN_MISSING_ERR });
     }
-};
+}

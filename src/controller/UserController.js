@@ -2,7 +2,7 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken')
 const userRepository = require('../repository/userRepository');
-const { INTERNAL_SERVER_ERROR, USER_NOT_FOUND_ERR, WRONG_PASSWORD_ERR, SERVER_ERR, DUPLICATE_RECORD_ERR } = require('../error/error');
+const { INTERNAL_SERVER_ERROR, USER_NOT_FOUND_ERR, WRONG_PASSWORD_ERR, SERVER_ERR, DUPLICATE_RECORD_ERR, UN_AUTHORIZED_ERR } = require('../error/error');
 require('dotenv').config();
 const SECRET_KEY = process.env.SECRET_KEY
 
@@ -47,9 +47,10 @@ exports.userLogin = async (req, res, next) => {
             return next({ status: 500, message: result.code });
         }
         let hash = result[0].password
+        let role = result[0].role
         bcrypt.compare(user.password, hash).then((isMatch) => {
             if (isMatch) {
-                const token = jwt.sign({ username: user.email }, SECRET_KEY, { expiresIn: '1h' });
+                const token = jwt.sign({ username: user.email, role: role }, SECRET_KEY, { expiresIn: '1h' });
                 return res.status(200).json({ token });
             } else {
                 return next({ status: 401, message: WRONG_PASSWORD_ERR });
@@ -79,4 +80,18 @@ exports.getUser = async (req, res, next) => {
         return next({ status: 500, message: result.code });
     }
     return result
+}
+
+exports.getUsers = async (req, res, next) => {
+    console.log(req.user)
+    if(req.user.role !== 'admin'){
+        return next({status: 401, message: UN_AUTHORIZED_ERR})
+    }
+    try {
+        const result = await userRepository.getUsers()
+        return res.status(200).json({ result })
+    } catch (error) {
+        return next({ status: 500, message: error })
+    }
+
 }

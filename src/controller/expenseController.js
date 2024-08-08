@@ -44,15 +44,26 @@ exports.getAllExpenses = async (req, res, next) => {
 exports.getExpenses = async (req, res, next) => {
     try {
         let email = req.user.username
-        const result = await expensesRepository.getExpenses(email)
-        if (result.length === 0) {
-            return next({ status: 404, message: RECORD_NOT_FOUND_ERR })
+        console.log('Role : ', req.user.role)
+        if (req.user.role === 'user') {
+            const result = await expensesRepository.getExpenses(email)
+            if (result.length === 0) {
+                return next({ status: 404, message: RECORD_NOT_FOUND_ERR })
+            }
+            if (result.code) {
+                console.log(result)
+                return next({ status: 500, message: INTERNAL_SERVER_ERROR })
+            }
+            return res.status(200).json({ result })
+        } else if (req.user.role === 'admin') {
+            try {
+                const result = await expensesRepository.fetchAllExpences()
+                return res.status(200).json({ result })
+            } catch (error) {
+                return next(error)
+            }
         }
-        if (result.code) {
-            console.log(result)
-            return next({ status: 500, message: INTERNAL_SERVER_ERROR })
-        }
-        return res.status(200).json({ result })
+
     } catch (error) {
         return next({ status: 500, message: error.message })
     }

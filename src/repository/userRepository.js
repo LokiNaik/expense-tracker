@@ -1,18 +1,26 @@
 const db = require('../db/db.config')
-const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
+require('dotenv').config
 const { hashPassword } = require('../service/userService');
 const { queryHelper } = require('./queryHelper');
+const { query } = require('express');
 
 class UserRepository {
 
     async createUser(user) {
         try {
-            const { name, email, contact, password } = user
-            var sql = "INSERT INTO user (name, email, contact, password) VALUES (?,?,?,?) ";
+            const { name, email, contact, password, role } = user
+            var sql = "INSERT INTO user (name, email, contact, password, role) VALUES (?,?,?,?,?) ";
             let hashedPassword = await hashPassword(password)
-            // console.log('hashed password :', hashedPassword)
-            const result = await queryHelper(sql, [name, email, contact, hashedPassword])
-            return result
+            const result = await queryHelper(sql, [name, email, contact, hashedPassword, role])
+            if (result.insertId) {
+                const payload = {
+                    username: email,
+                    role: role
+                }
+                const token = jwt.sign(payload, process.env.SECRET_KEY, { expiresIn: '1hr' })
+                return token
+            }
         } catch (error) {
             console.log('Error in register new user!', error)
             throw error
@@ -38,6 +46,17 @@ class UserRepository {
             return result
         } catch (error) {
             console.log('Error fetching user : ', error)
+            throw error
+        }
+    }
+
+    async getUsers() {
+        let sql = 'SELECT user.id, user.email, user.contact, user.role FROM user'
+        try {
+            const result = await queryHelper(sql)
+            return result
+        } catch (error) {
+            console.log(error)
             throw error
         }
     }

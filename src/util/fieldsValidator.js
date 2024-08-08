@@ -27,7 +27,8 @@ const registerValidation = async (req, res, next) => {
             .required(),
         contact: joi.string()
             .min(8)
-            .required()
+            .required(),
+        role: joi.string()
     })
     const { error } = schema.validate(req.body)
     if (error) {

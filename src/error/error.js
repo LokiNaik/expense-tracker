@@ -19,3 +19,5 @@ exports.WRONG_PASSWORD_ERR = 'Wrong password'
 exports.RECORD_NOT_FOUND_ERR = 'RECORD_NOT_FOUND'
 
 exports.DUPLICATE_RECORD_ERR = "A user already exist"
+
+exports.UN_AUTHORIZED_ERR = "UnAuthorized!"
