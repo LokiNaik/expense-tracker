@@ -82,10 +82,16 @@ exports.getUser = async (req, res, next) => {
     return result
 }
 
+/**
+ * 
+ * @param {object} request Express request object
+ * @param {object} res Express response object
+ * @param {object} next Express next middleware function
+ * @returns  
+ */
 exports.getUsers = async (req, res, next) => {
-    console.log(req.user)
-    if(req.user.role !== 'admin'){
-        return next({status: 401, message: UN_AUTHORIZED_ERR})
+    if (req.user.role !== 'admin') {
+        return next({ status: 401, message: UN_AUTHORIZED_ERR })
     }
     try {
         const result = await userRepository.getUsers()
